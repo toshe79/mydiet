@@ -328,7 +328,7 @@ body{
 .lib-item .drag-handle:active{cursor:grabbing;}
 .lib-item{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:12px 13px;display:flex;align-items:center;gap:11px;transition:border-color .2s;}
 .lib-item:active{border-color:var(--accent);}
-.lib-emo{font-size:22px;flex-shrink:0;}
+.lib-emo{font-size:32px;flex-shrink:0;}
 .lib-info{flex:1;min-width:0;}
 .lib-name{font-family:var(--ff-display),serif;font-size:15px;margin-bottom:5px;}
 
@@ -1076,6 +1076,7 @@ function getFoodIcon(meal){
   <div style="display:flex;gap:4px;background:var(--surface2);border-radius:12px;padding:4px;margin-bottom:16px">
     <button id="ns-tab-search" onclick="nsTab('search')" style="flex:1;padding:8px;border-radius:8px;border:none;font-family:var(--ff-body);font-size:12px;font-weight:600;cursor:pointer;background:var(--accent);color:#fff;transition:all .2s">Продукт</button>
     <button id="ns-tab-dish" onclick="nsTab('dish')" style="flex:1;padding:8px;border-radius:8px;border:none;font-family:var(--ff-body);font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">Ястие</button>
+    <button id="ns-tab-photo" onclick="nsTab('photo')" style="flex:1;padding:8px;border-radius:8px;border:none;font-family:var(--ff-body);font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">📷 Етикет</button>
   </div>
 
   <!-- SEARCH PANEL -->
@@ -1103,12 +1104,53 @@ function getFoodIcon(meal){
       <button onclick="nsAutoLoad()" id="ns-auto-btn"
         style="padding:0 14px;border-radius:10px;border:none;background:var(--amber);color:#fff;font-family:var(--ff-body);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">🪄 Зареди</button>
     </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;background:var(--surface2);border-radius:10px;padding:10px 14px;border:1.5px solid var(--border)">
+      <span style="font-size:13px;color:var(--text2);white-space:nowrap">🍽️ Порция:</span>
+      <input id="ns-portion" type="number" value="" min="1" placeholder="авто"
+        style="width:80px;padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;color:var(--text);outline:none;text-align:center">
+      <span style="font-size:13px;color:var(--text2)">г</span>
+      <span style="font-size:11px;color:var(--text3);flex:1">Остави празно = сума от съставките</span>
+    </div>
     <div id="ns-ing-list"></div>
     <button onclick="nsAddIng()" style="width:100%;padding:10px;border-radius:8px;border:1.5px dashed var(--border);background:transparent;color:var(--text2);font-family:var(--ff-body);font-size:13px;cursor:pointer;margin-bottom:12px">+ Добави съставка</button>
     <button onclick="nsCalcDish()" id="ns-calc-btn"
       style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-family:var(--ff-body);font-size:14px;font-weight:600;cursor:pointer">⚡ Изчисли</button>
     <div id="ns-dish-result"></div>
   </div>
+
+  <!-- PHOTO PANEL -->
+  <div id="ns-panel-photo" style="display:none">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Снимай или качи снимка на хранителен етикет — AI ще разчете данните автоматично.</div>
+    <div id="ns-photo-upload-area">
+    <label for="ns-photo-input" id="ns-photo-label"
+      style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:2px dashed var(--border);border-radius:14px;padding:20px 16px;cursor:pointer;margin-bottom:8px;background:var(--surface2)">
+      <span style="font-size:40px">📷</span>
+      <span style="font-size:13px;color:var(--text2);text-align:center">Натисни за снимка или качи от галерията</span>
+    </label>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="document.getElementById('ns-photo-camera').click()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--ff-body);font-size:13px;cursor:pointer">📷 Камера</button>
+      <button onclick="document.getElementById('ns-photo-input').click()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--ff-body);font-size:13px;cursor:pointer">🖼️ Галерия</button>
+    </div>
+    </div>
+    <input type="file" id="ns-photo-camera" accept="image/*" capture="environment" style="display:none" onchange="nsPhotoSelected(this)">
+    <input type="file" id="ns-photo-input" accept="image/*" style="display:none" onchange="nsPhotoSelected(this)">
+    <div id="ns-photo-preview" style="display:none;margin-bottom:12px">
+      <img id="ns-photo-img" style="width:100%;border-radius:12px;max-height:220px;object-fit:cover">
+      <button onclick="nsRemovePhoto()" style="width:100%;margin-top:8px;padding:9px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--amber);font-family:var(--ff-body);font-size:13px;cursor:pointer">✕ Премахни и снимай наново</button>
+    </div>
+    <input id="ns-photo-name" type="text" placeholder="Описание на продукта (незадължително)..."
+      style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-family:var(--ff-body);font-size:13px;color:var(--text);outline:none;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <span style="font-size:12px;color:var(--text2);white-space:nowrap">Количество:</span>
+      <input id="ns-photo-grams" type="number" value="100" min="1"
+        style="width:72px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:13px;color:var(--text);outline:none;text-align:center">
+      <span style="font-size:12px;color:var(--text2)">г</span>
+    </div>
+    <button onclick="nsAnalyzePhoto()" id="ns-photo-btn"
+      style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-family:var(--ff-body);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:4px">🔍 Анализирай етикета</button>
+    <div id="ns-photo-result"></div>
+  </div>
+
 </div>
 
 <nav class="bottom-nav">
@@ -4067,21 +4109,128 @@ renderWeek();
 
 // ══════ NUTRISCAN ══════
 const NS_API = "https://api.anthropic.com/v1/messages";
-const NS_KEY = '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';
+const NS_KEY = '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';
 let nsIngCount = 0;
 
 function nsTab(tab) {
   const isSearch = tab === 'search';
+  const isDish = tab === 'dish';
+  const isPhoto = tab === 'photo';
   document.getElementById('ns-panel-search').style.display = isSearch ? '' : 'none';
-  document.getElementById('ns-panel-dish').style.display = isSearch ? 'none' : '';
-  const btnS = document.getElementById('ns-tab-search');
-  const btnD = document.getElementById('ns-tab-dish');
-  btnS.style.background = isSearch ? 'var(--accent)' : 'transparent';
-  btnS.style.color = isSearch ? '#fff' : 'var(--text2)';
-  btnS.style.fontWeight = isSearch ? '600' : '500';
-  btnD.style.background = isSearch ? 'transparent' : 'var(--accent)';
-  btnD.style.color = isSearch ? 'var(--text2)' : '#fff';
-  btnD.style.fontWeight = isSearch ? '500' : '600';
+  document.getElementById('ns-panel-dish').style.display = isDish ? '' : 'none';
+  document.getElementById('ns-panel-photo').style.display = isPhoto ? '' : 'none';
+  ['search','dish','photo'].forEach(t => {
+    const btn = document.getElementById('ns-tab-'+t);
+    if (!btn) return;
+    const active = t === tab;
+    btn.style.background = active ? 'var(--accent)' : 'transparent';
+    btn.style.color = active ? '#fff' : 'var(--text2)';
+    btn.style.fontWeight = active ? '600' : '500';
+  });
+}
+
+function nsRemovePhoto() {
+  window._nsPhotoBase64 = null;
+  window._nsPhotoType = null;
+  document.getElementById('ns-photo-preview').style.display = 'none';
+  document.getElementById('ns-photo-upload-area').style.display = '';
+  document.getElementById('ns-photo-input').value = '';
+  document.getElementById('ns-photo-camera').value = '';
+  document.getElementById('ns-photo-result').innerHTML = '';
+}
+
+function nsPhotoSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('ns-photo-img').src = e.target.result;
+    document.getElementById('ns-photo-preview').style.display = '';
+    document.getElementById('ns-photo-upload-area').style.display = 'none';
+    window._nsPhotoBase64 = e.target.result.split(',')[1];
+    window._nsPhotoType = file.type;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function nsAnalyzePhoto() {
+  if (!window._nsPhotoBase64) { alert('Моля качи снимка на етикет'); return; }
+  const grams = parseInt(document.getElementById('ns-photo-grams').value) || 100;
+  const nameHint = document.getElementById('ns-photo-name').value.trim();
+  const btn = document.getElementById('ns-photo-btn');
+  btn.disabled = true; btn.textContent = '⏳ Анализирам...';
+  document.getElementById('ns-photo-result').innerHTML = '<div style="text-align:center;padding:16px;color:var(--text2);font-size:13px">⏳ Разчитам етикета...</div>';
+
+  const prompt = `Разчети хранителната таблица от снимката. Важно:
+- Енергийната стойност е написана като "кДж/ккал" — вземи САМО ккал (втората цифра)
+- Белтъчини = протеин (реда "Белтъци" или "Protein")
+- Въглехидрати = реда "Въглехидрати" или "Carbohydrates" (НЕ захарите)
+- Мазнини = реда "Мазнини" или "Fat" (НЕ наситените)
+- Всички стойности са за 100г
+- Изчисли за ${grams}г: стойност × ${grams} / 100
+${nameHint ? 'Продуктът се казва: ' + nameHint : ''}
+
+Върни САМО JSON без никакъв текст:
+{"name":"${nameHint || 'продукт'}","grams":${grams},"calories":0,"protein":0.0,"carbs":0.0,"fat":0.0,"fiber":0.0,"sugar":0.0,"saturated_fat":0.0}`;
+
+  try {
+    const res = await fetch(NS_API, {
+      method: 'POST',
+      headers: nsHeaders(),
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: window._nsPhotoType || 'image/jpeg', data: window._nsPhotoBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.content[0].text.replace(/```json|```/g,'').trim();
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Не намерих JSON');
+    const d = JSON.parse(jsonMatch[0]);
+    document.getElementById('ns-photo-result').innerHTML = `
+      <div style="background:var(--surface2);border-radius:14px;padding:16px;margin-top:12px;border:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+          <div>
+            <div style="font-family:var(--ff-display);font-size:18px">${d.name}</div>
+            <div style="font-size:11px;color:var(--text2)">${grams}г</div>
+          </div>
+          <div style="background:var(--accent-dim);border-radius:10px;padding:8px 12px;text-align:center">
+            <div style="font-family:var(--ff-display);font-size:22px;color:var(--accent)">${Math.round(d.calories)}</div>
+            <div style="font-size:10px;color:var(--text2)">ккал</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+          ${nsMacroBox('Белтъчини','#4A7C59',d.protein)}
+          ${nsMacroBox('Въглехидрати','#C4773B',d.carbs)}
+          ${nsMacroBox('Мазнини','#7B5EA7',d.fat)}
+        </div>
+        ${d.fiber||d.sugar||d.saturated_fat ? `<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;font-size:11px;color:var(--text2)">
+          ${d.fiber?`<span>Фибри: ${(+d.fiber).toFixed(1)}г</span>`:''}
+          ${d.sugar?`<span>Захар: ${(+d.sugar).toFixed(1)}г</span>`:''}
+          ${d.saturated_fat?`<span>Нас.маз: ${(+d.saturated_fat).toFixed(1)}г</span>`:''}
+        </div>`:''}
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">📋 Разчетено от етикета</div>
+        <button onclick="nsSaveToLibrary(${JSON.stringify(d).replace(/"/g,'&quot;')},${grams})" style="width:100%;padding:10px;border-radius:8px;border:none;background:var(--accent-dim);color:var(--accent);font-family:var(--ff-body);font-size:13px;font-weight:600;cursor:pointer">💾 Запази в библиотека</button>
+      </div>`;
+  } catch(e) {
+    document.getElementById('ns-photo-result').innerHTML = `<div style="color:var(--amber);font-size:13px;padding:12px;background:var(--amber-dim);border-radius:10px;border:1px solid var(--amber)">
+      ⚠️ Не успях да разчета етикета.<br><br>
+      <strong>Съвети за по-добра снимка:</strong><br>
+      • Снимай само таблицата с хранителни стойности<br>
+      • Добро осветление, без отблясъци<br>
+      • Текстът да е хоризонтален<br>
+      • Колкото по-близо, толкова по-добре
+    </div>`;
+  }
+  btn.disabled = false; btn.textContent = '🔍 Анализирай етикета';
 }
 
 function nsHeaders() {
@@ -4113,7 +4262,7 @@ async function nsDoSearch() {
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
-          ${nsMacroBox('Протеини','#4A7C59',d.protein)}
+          ${nsMacroBox('Белтъчини','#4A7C59',d.protein)}
           ${nsMacroBox('Въглехидрати','#C4773B',d.carbs)}
           ${nsMacroBox('Мазнини','#7B5EA7',d.fat)}
         </div>
@@ -4134,6 +4283,57 @@ function nsMacroBox(label, color, val) {
 }
 
 function nsSaveToLibrary(d, grams) {
+  const EMOJIS = ['🍽️','🥚','🍳','🥞','🥣','🍲','🫕','🍝','🥗','🍗','🥩','🐟','🥛','🧀','🫙','🍎','🍐','🍌','🍊','🍋','🫐','🍇','🥦','🥕','🥔','🍅','🌽','🫘','🍞','🌾','🥜','🍯','🧄','🫚'];
+  const current = d.emoji || '🥗';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'ns-save-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:flex-end;justify-content:center';
+
+  const panel = document.createElement('div');
+  panel.style.cssText = 'background:var(--surface);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:440px;max-height:80vh;overflow-y:auto';
+
+  let selectedEmoji = current;
+
+  panel.innerHTML = `
+    <div style="font-family:var(--ff-display);font-size:18px;margin-bottom:6px">💾 Запази в библиотека</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px">${d.name}</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:600">Избери емоджи:</div>
+    <div id="ns-emoji-grid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+      ${EMOJIS.map(e => `<button onclick="nsSelectEmoji(this,'${e}')" style="font-size:28px;width:48px;height:48px;border-radius:10px;border:2px solid ${e===selectedEmoji?'var(--accent)':'var(--border)'};background:${e===selectedEmoji?'var(--accent-dim)':'var(--surface2)'};cursor:pointer;transition:all .15s">${e}</button>`).join('')}
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:600">Или въведи собствено:</div>
+    <input id="ns-custom-emoji" type="text" placeholder="✍️" maxlength="2" value="${current}"
+      oninput="nsSelectCustomEmoji(this.value)"
+      style="width:64px;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-size:24px;text-align:center;outline:none;margin-bottom:16px">
+    <div style="display:flex;gap:8px">
+      <button onclick="document.getElementById('ns-save-overlay').remove()" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text2);font-family:var(--ff-body);font-size:14px;cursor:pointer">Отказ</button>
+      <button onclick="nsConfirmSave()" style="flex:2;padding:12px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-family:var(--ff-body);font-size:14px;font-weight:600;cursor:pointer">✅ Запази</button>
+    </div>`;
+
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+
+  window._nsSaveData = { d, grams, emoji: selectedEmoji };
+}
+
+function nsSelectEmoji(btn, emoji) {
+  document.querySelectorAll('#ns-emoji-grid button').forEach(b => {
+    b.style.borderColor = 'var(--border)';
+    b.style.background = 'var(--surface2)';
+  });
+  btn.style.borderColor = 'var(--accent)';
+  btn.style.background = 'var(--accent-dim)';
+  document.getElementById('ns-custom-emoji').value = emoji;
+  window._nsSaveData.emoji = emoji;
+}
+
+function nsSelectCustomEmoji(val) {
+  if (val) window._nsSaveData.emoji = val;
+}
+
+function nsConfirmSave() {
+  const { d, grams, emoji } = window._nsSaveData;
   try {
     const raw = localStorage.getItem('md_v5');
     const S = raw ? JSON.parse(raw) : { meals:[], weekPlans:{} };
@@ -4142,7 +4342,7 @@ function nsSaveToLibrary(d, grams) {
     const newMeal = {
       id: 'ns_' + Date.now(),
       name: d.name,
-      emoji: '🥗',
+      emoji: emoji || '🥗',
       type: 'обяд',
       tags: ['nutriscan'],
       kcal: kcalPer100,
@@ -4152,7 +4352,10 @@ function nsSaveToLibrary(d, grams) {
     };
     S.meals.unshift(newMeal);
     localStorage.setItem('md_v5', JSON.stringify(S));
-    alert('✅ Запазено в библиотека!');
+    document.getElementById('ns-save-overlay')?.remove();
+    // Refresh library if visible
+    if (typeof renderLib === 'function') try { renderLib(); } catch(e){}
+    setTimeout(() => alert('✅ Запазено в библиотека!'), 100);
   } catch(e) { alert('Грешка при запазване'); }
 }
 
@@ -4190,6 +4393,7 @@ function nsAddIng(name='', grams='') {
 
 async function nsCalcDish() {
   const name = document.getElementById('ns-dish-name').value.trim() || 'Ястие';
+  const portionInput = parseFloat(document.getElementById('ns-portion').value) || 0;
   const rows = document.querySelectorAll('#ns-ing-list > div');
   const ings = [];
   rows.forEach(r => {
@@ -4208,17 +4412,29 @@ async function nsCalcDish() {
     const res = await fetch(NS_API,{method:'POST',headers:nsHeaders(),body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})});
     const data = await res.json();
     const d = JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
+
+    // Ако е зададена порция — преизчисли пропорционално
+    const totalG = d.total_grams || ings.reduce((s,i) => s+i.grams, 0);
+    const portion = portionInput > 0 ? portionInput : totalG;
+    const ratio = portion / totalG;
+    const cal = Math.round(d.total_calories * ratio);
+    const prot = (d.total_protein * ratio).toFixed(1);
+    const carb = (d.total_carbs * ratio).toFixed(1);
+    const fat = (d.total_fat * ratio).toFixed(1);
+    const portionLabel = portionInput > 0 ? `${portion}г (порция)` : `${totalG}г (общо)`;
+
     document.getElementById('ns-dish-result').innerHTML = `
       <div style="background:var(--surface2);border-radius:14px;padding:16px;margin-top:12px;border:1px solid var(--border)">
         <div style="font-family:var(--ff-display);font-size:18px;margin-bottom:4px">${d.dish}</div>
-        <div style="font-size:11px;color:var(--text2);margin-bottom:12px">${d.total_grams}г общо</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:12px">${portionLabel}${portionInput>0?' · общо '+totalG+'г':''}</div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px">
-          <div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center"><div style="font-family:var(--ff-display);font-size:18px">${Math.round(d.total_calories)}</div><div style="font-size:10px;color:var(--text2)">ккал</div></div>
-          ${nsMacroBox('Протеини','#4A7C59',d.total_protein)}
-          ${nsMacroBox('Въгл','#C4773B',d.total_carbs)}
-          ${nsMacroBox('Маз','#7B5EA7',d.total_fat)}
+          <div style="background:var(--surface);border-radius:8px;padding:8px;text-align:center"><div style="font-family:var(--ff-display);font-size:18px">${cal}</div><div style="font-size:10px;color:var(--text2)">ккал</div></div>
+          ${nsMacroBox('Белтъчини','#4A7C59',prot)}
+          ${nsMacroBox('Въгл','#C4773B',carb)}
+          ${nsMacroBox('Маз','#7B5EA7',fat)}
         </div>
-        <button onclick="nsSaveToLibrary(${JSON.stringify({name:d.dish,calories:d.total_calories,protein:d.total_protein,carbs:d.total_carbs,fat:d.total_fat}).replace(/"/g,'&quot;')},${d.total_grams})" style="width:100%;padding:10px;border-radius:8px;border:none;background:var(--accent-dim);color:var(--accent);font-family:var(--ff-body);font-size:13px;font-weight:600;cursor:pointer">💾 Запази в библиотека</button>
+        ${portionInput>0?`<div style="font-size:11px;color:var(--text3);margin-bottom:10px">Стойностите са за ${portion}г порция от общо ${totalG}г</div>`:''}
+        <button onclick="nsSaveToLibrary(${JSON.stringify({name:d.dish,calories:d.total_calories,protein:d.total_protein,carbs:d.total_carbs,fat:d.total_fat}).replace(/"/g,'&quot;')},${totalG})" style="width:100%;padding:10px;border-radius:8px;border:none;background:var(--accent-dim);color:var(--accent);font-family:var(--ff-body);font-size:13px;font-weight:600;cursor:pointer">💾 Запази в библиотека</button>
       </div>`;
   } catch(e) {
     document.getElementById('ns-dish-result').innerHTML = '<div style="color:var(--amber);font-size:13px;padding:12px">⚠️ Грешка. Провери връзката.</div>';
