@@ -328,7 +328,7 @@ body{
 .lib-item .drag-handle:active{cursor:grabbing;}
 .lib-item{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:12px 13px;display:flex;align-items:center;gap:11px;transition:border-color .2s;}
 .lib-item:active{border-color:var(--accent);}
-.lib-emo{font-size:32px;flex-shrink:0;}
+.lib-emo{font-size:38px;flex-shrink:0;}
 .lib-info{flex:1;min-width:0;}
 .lib-name{font-family:var(--ff-display),serif;font-size:15px;margin-bottom:5px;}
 
@@ -2119,7 +2119,7 @@ function renderLib(){
         <span style="font-family:var(--ff-display);font-size:16px;color:var(--text)">${cat.label}</span>
         <span style="font-size:11px;color:var(--text3);background:var(--surface2);border-radius:20px;padding:2px 8px">${catItems.length}</span>
       </div>
-      <span style="font-size:28px;color:var(--accent);font-weight:300;line-height:1;transform:${isOpen?'rotate(90deg)':'rotate(0deg)'};transition:transform .2s;display:inline-block">${isOpen?'▾':'▸'}</span>`;
+      <span style="font-size:36px;color:var(--accent);font-weight:400;line-height:1;transform:${isOpen?'rotate(90deg)':'rotate(0deg)'};transition:transform .2s;display:inline-block;width:44px;height:44px;display:flex;align-items:center;justify-content:center">${isOpen?'▾':'▸'}</span>`;
     header.onclick = () => {
       window._libOpen[cat.id] = !window._libOpen[cat.id];
       renderLib();
@@ -2146,7 +2146,7 @@ function renderLib(){
       d.dataset.id=m.id;
       d.innerHTML=`
         <div class="drag-handle" title="Плъзни за пренареждане">⠿</div>
-        <div class="lib-emo">${(()=>{const src=getFoodIcon(m);return src?`<img src="${src}" style="width:36px;height:36px;object-fit:contain;border-radius:6px">`:m.emoji;})()}</div>
+        <div class="lib-emo">${m.emoji || '🍽️'}</div>
         <div class="lib-info">
           <div class="lib-name">${m.name}</div>
           <div class="lib-tags">
@@ -2158,8 +2158,8 @@ function renderLib(){
           </div>
         </div>
         <div class="lib-btns">
-          <div class="btn-ico" onclick="startEdit('${m.id}')">✏️</div>
-          <div class="btn-ico" onclick="delMeal('${m.id}')">🗑️</div>
+          <div class="btn-ico" onclick="event.stopPropagation();startEdit('${m.id}')">✏️</div>
+          <div class="btn-ico" onclick="event.stopPropagation();delMeal('${m.id}')">🗑️</div>
         </div>`;
       itemsWrap.appendChild(d);
     });
