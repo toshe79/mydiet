@@ -1,0 +1,26 @@
+{
+  "name": "Моята Диета",
+  "short_name": "МояДиета",
+  "description": "Личен помощник за здравословно хранене и проследяване на макроси",
+  "start_url": "/mydiet/",
+  "scope": "/mydiet/",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#4a7c59",
+  "orientation": "portrait",
+  "lang": "bg",
+  "icons": [
+    {
+      "src": "/mydiet/icons/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mydiet/icons/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
